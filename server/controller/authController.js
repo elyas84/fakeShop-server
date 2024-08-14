@@ -4,11 +4,11 @@ const bcrypt = require("bcrypt");
 const { validationResult } = require("express-validator");
 const nodemailer = require("nodemailer");
 
-//@POST Rgister
+//@desc Register
 //@route /register
 
 exports.newUser = async (req, res) => {
-  const { username, email, password, isAdmin } = req.body;
+  const { username, email, password, role } = req.body;
   try {
     let user = await User.findOne({ email });
     let registerName = await User.findOne({ username });
@@ -27,7 +27,7 @@ exports.newUser = async (req, res) => {
     user = new User({
       username,
       email,
-      isAdmin,
+      role,
       password: hash,
     });
 
@@ -53,15 +53,61 @@ exports.newUser = async (req, res) => {
       from: process.env.EMAIL_ADDERESS,
       to: user.email,
       subject: "Email confirmation from Fake-Shop",
-      html: `<h2>Dear user welcome to Fake-Shop</h2>
-            <p>Please confirm your email by cklicking on the following link
-            <a href="http://localhost:5000/api/auth/confirm/${confirmationToken}">Confirm Email</a></p>`,
+      html: `
+          <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=, initial-scale=1.0" />
+        <title></title>
+        <style>
+          * {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+          }
+          h1 {
+            background-color: gray;
+            width: 100%;
+            height: 100%;
+            padding: 5px;
+            color: #fff;
+          }
+          p {
+            color: gray;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          a {
+            border: 1px solid lightgray;
+            padding: 4px;
+            margin: 0 10px;
+          }
+        </style>
+      </head>
+
+      <body>
+        <h1>👋 ${username}, welcome to Fake-Shop 🤩</h1>
+        <p>
+          Please confirm your email by cklicking on the following link ➡️
+          <a href="http://localhost:5000/api/auth/confirm/${confirmationToken}"
+            >Confirm your Email
+          </a>
+          ⬅️
+        </p>
+      </body>
+    </html>
+      
+      
+      `,
     };
 
     await transporter.sendMail(mailOption);
     res.status(201).json({
       message:
-        "User registered. Please check your email to confirm your account.",
+        "The user signed up. To validate your account, please check your email.",
     });
   } catch (error) {
     console.log(error);
@@ -88,10 +134,76 @@ exports.getEmailConfirmation = async (req, res) => {
     user.confirmationToken = null;
     await user.save();
     return res.status(201).json({
-      message: "Congrats! your email now is confirmed successefuly!",
+      message: "Congratulations! Your email has been successfully confirmed.",
     });
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
   }
+};
+
+//@desc Login
+//@route /login
+exports.login = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      message: errors.array()[0].msg,
+    });
+  }
+  const { username } = req.body;
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({
+        message: "wrong login information; try again!",
+      });
+    }
+    const isPasswordValid = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        message: "wrong login information; try again!",
+      });
+    }
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_KEY,
+      {
+        expiresIn: "1h",
+      }
+    );
+    const { password, ...info } = user._doc;
+    return res
+      .cookie("accessToken", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 60 * 60 * 1000, // 1h,
+      })
+      .status(200)
+      .json(info);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
+//@desc Logout
+//@route /logout
+
+exports.logout = async (req, res) => {
+  res
+    .clearCookie("accessToken", {
+      httpOnly: true,
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    })
+    .status(200)
+    .json({
+      message: "The user has successfully signed out.",
+    });
 };

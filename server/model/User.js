@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
@@ -15,10 +15,12 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      lowercase: true,
     },
-    isAdmin: {
-      type: Boolean,
-      default: false,
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
     },
     isVerified: {
       type: Boolean,

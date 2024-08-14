@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+let token;
 const verifyToken = async (req, res, next) => {
-  const token = req.cookies.accessToken;
+  token = req.cookies.accessToken;
   if (!token) {
     return res.status(401).json({
       message: "Unauthorized User, please login.",
@@ -18,4 +19,19 @@ const verifyToken = async (req, res, next) => {
   });
 };
 
-module.exports = { verifyToken };
+const verifyAdmin = async (req, res, next) => {
+  const decoded = jwt.verify(token, process.env.JWT_KEY);
+  try {
+    if (decoded.role === "admin") {
+      next();
+    } else {
+      return res.status(400).json({
+        message: "Access denied, Admin only.",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports = { verifyToken, verifyAdmin };

@@ -1,6 +1,5 @@
 const { check } = require("express-validator");
-const userRegisterInput = [
-  check("email", "email cannnot be empty").not().isEmpty().isEmail().bail(),
+const userLoginInput = [
   check("username", "username cannnot be empty").not().isEmpty().bail(),
   check(
     "password",
@@ -8,4 +7,4 @@ const userRegisterInput = [
   ).isLength({ min: 5, max: 80 }),
 ];
 
-module.exports = userRegisterInput;
+module.exports = userLoginInput;

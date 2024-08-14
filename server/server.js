@@ -10,6 +10,8 @@ const path = require("path");
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
+app.use(morgan("dev"));
 
 // DB
 const mongoConn = async () => {
@@ -27,8 +29,13 @@ mongoConn();
  */
 
 const authRoute = require("./route/authRouters");
-
+const userRoute = require("./route/userRouters");
+const productRoute = require("./route/productRouters");
+const orderRoute = require("./route/orderRouters");
+app.use("/api/orders", orderRoute);
 app.use("/api/auth", authRoute);
+app.use("/api/users", userRoute);
+app.use("/api/products", productRoute);
 
 app.listen(PORT, () => {
   console.log("Server is running on port " + PORT);
