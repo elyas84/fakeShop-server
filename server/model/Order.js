@@ -4,8 +4,9 @@ const orderSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "user",
+      ref: "User",
     },
+
     orderItems: [
       {
         productName: { type: String, required: true },
@@ -30,14 +31,14 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     shipping: {
-      type: String,
+      type: Number,
       required: true,
-      default: 0.0,
+      default: 4.99,
     },
     tax: {
       type: Number,
       required: true,
-      default: 0.0,
+      default: 5.5,
     },
     total: {
       type: Number,

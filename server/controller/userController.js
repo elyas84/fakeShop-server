@@ -95,13 +95,16 @@ exports.userProfile = async (req, res) => {
 
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find({ role: "user" });
+    let count = await User.countDocuments({ role: "user" });
+
     if (users && users.length === 0) {
       return res.status(404).json({
         message: "As of yet, no users have been created.",
+        count,
       });
     } else {
-      return res.status(200).json(users);
+      return res.status(200).json({ users, count });
     }
   } catch (error) {
     console.log(error);

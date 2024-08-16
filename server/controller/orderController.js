@@ -1,14 +1,39 @@
+const { json } = require("express");
 const Order = require("../model/Order");
+const User = require("../model/User");
 
 exports.getOrderItems = async (req, res) => {
+  let orders;
+  count = await Order.countDocuments();
   try {
-    let orders = await Order.find();
-    if (orders && orders.length === 0) {
-      return res.status(404).json({
-        message: "No order has been placed as of yet.",
+    let paid = req.query.paid;
+    let delivered = req.query.delivered;
+    let paidAndDelivered = req.query.paidAndDelivered;
+    if (paid) {
+      count = await Order.countDocuments({ isPaid: true });
+      orders = await Order.find({ isPaid: true });
+      return res.status(200).json({ orders, count });
+    } else if (paidAndDelivered) {
+      orders = await Order.find({
+        $and: [{ delivered: true }, { isPaid: true }],
       });
+      count = await Order.countDocuments({ delivered: true }, { isPaid: true });
+      return res.status(200).json({ orders, count });
+    } else if (delivered) {
+      count = await Order.countDocuments({ delivered: true });
+      orders = await Order.find({ delivered: true });
+      return res.status(200).json({ orders, count });
     } else {
-      return res.status(200).json(orders);
+      orders = await Order.find().populate("user", "email username");
+      count = await Order.countDocuments();
+      if (orders && orders.length === 0) {
+        return res.status(404).json({
+          message: "No order has been placed as of yet.",
+          count,
+        });
+      } else {
+        return res.status(200).json({ orders, count });
+      }
     }
   } catch (error) {
     console.log(error);
@@ -17,16 +42,21 @@ exports.getOrderItems = async (req, res) => {
 };
 
 exports.newOrder = async (req, res) => {
-  const { orderItems, shipping, tax, total } = req.body;
+  const { orderItems } = req.body;
+  const totalPriceForItems = orderItems.map((data) => {
+    return data.price * data.quanity;
+  });
+  let sum = 0;
+  totalPriceForItems.reduce(function (accumulator, currentValue) {
+    return (sum = accumulator + currentValue);
+  }, 0);
+
   try {
     let order = new Order({
       orderItems,
-      shipping,
-      tax,
-      total,
-      user: req.userId
+      total: sum + 5.5 + 4.99,
+      user: req.userId,
     });
-
     order = await order.save();
     return res.status(201).json(order);
   } catch (error) {
@@ -37,7 +67,34 @@ exports.newOrder = async (req, res) => {
 
 exports.getMyOrders = async (req, res) => {
   try {
-    const myOrder = await Order.findById(req.params.id);
+    let count = await Order.countDocuments({ user: req.userId });
+    const myOrders = await Order.find({ user: req.userId }).populate(
+      "user",
+      "orderList"
+    );
+    if (myOrders && myOrders.length === 0) {
+      return res.status(404).json({
+        message: "There aren't any orders in your history right now!",
+      });
+    } else {
+      return res.status(200).json({ myOrders, count });
+    }
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json(error);
+  }
+};
+
+exports.getOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res
+        .status(404)
+        .json({ message: "there was no order discovered. " });
+    } else {
+      return res.status(200).json(order);
+    }
   } catch (error) {
     console.log(error.message);
     res.status(500).json(error);
@@ -48,6 +105,7 @@ exports.updateORderToPaid = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     order.isPaid = true;
+    await order.save();
     return res.status(201).json({
       message: "Your orders have been successfully paid.",
     });
@@ -60,7 +118,8 @@ exports.updateORderToPaid = async (req, res) => {
 exports.updateORderToDelivered = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
-    order.isPaid = true;
+    order.delivered = true;
+    await order.save();
     return res.status(201).json({
       message: "Your orders have been successfully delevired.",
     });
@@ -88,7 +147,7 @@ exports.getOrders = async (req, res) => {
 
 exports.deleteOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    await Order.findByIdAndDelete(req.params.id);
     return res.status(200).json({
       message: "The order has been removed at this time.",
     });
