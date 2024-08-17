@@ -42,7 +42,6 @@ exports.newProject = async (req, res) => {
       });
     }
     product = new Product(req.body);
-
     await product.save();
     return res.status(201).json(product);
   } catch (error) {
@@ -97,19 +96,57 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 
-// create a comment
-exports.newComment = async (req, res) => {
-  const { rating, comment } = req.body;
+exports.createReivew = async (req, res) => {
+  const { rating, comment, username } = req.body;
   try {
     const product = await Product.findById(req.params.id);
-    const userComment = {
-      rating,
-      comment,
-      user: req.userId,
-    };
-    product.comments.push(userComment);
-    await product.save();
-    res.status(200).json({ message: "Comment added successfully. " });
+    if (product) {
+      // searching thro the data
+      const alreadyReviewed = product.reviews.find(
+        (x) => x.user.toString() === req.userId.toString()
+      );
+      if (alreadyReviewed) {
+        return res.status(400).json({
+          message: "produtc alredy reviewed.",
+        });
+      }
+      // creating a review
+      let review = {
+        username,
+        rating,
+        comment,
+        user: req.userId,
+      };
+
+      product.reviews.push(review);
+      product.numReviews = product.reviews.length;
+      product.rating =
+        product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+        product.reviews.length;
+
+      await product.save();
+      return res.status(200).json({
+        message: "a new review added successfully. ",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
+exports.getProductByCategory = async (req, res) => {
+  try {
+    const cat = req.query.cat;
+    const products = await Product.find({ category: { $in: [cat] } });
+    if (products && products.length === 0) {
+      return res.status(404).json({
+        message:
+          "Sorry! It's possible that we don't have any products in stock, please come back later.",
+      });
+    } else {
+      return res.status(200).json(products);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json(error);

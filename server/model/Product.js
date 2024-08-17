@@ -1,9 +1,14 @@
 const mongoose = require("mongoose");
-const commentsSchema = new mongoose.Schema(
+
+const reviewSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
+      required: true,
       ref: "User",
+    },
+    username: {
+      type: String,
       required: true,
     },
     rating: {
@@ -16,6 +21,7 @@ const commentsSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
 const productSchema = new mongoose.Schema(
   {
     productName: {
@@ -48,8 +54,17 @@ const productSchema = new mongoose.Schema(
       required: true,
       default: 0,
     },
-
-    comments: [commentsSchema],
+    category: {
+      type: String,
+      enum: ["mobile", "tv", "gaming", "computer", "camera"],
+      required: true,
+    },
+    numReviews: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    reviews: [reviewSchema],
   },
   { timestamps: true }
 );

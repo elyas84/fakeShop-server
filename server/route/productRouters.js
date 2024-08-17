@@ -20,6 +20,8 @@ router
   .route("/delete/:id")
   .delete(verifyToken, verifyAdmin, productController.deleteProduct);
 // add c comment
-router.route("/:id/comments").post(verifyToken, productController.newComment);
+router.route("/:id/reviews").post(verifyToken, productController.createReivew);
+
+router.route("/categories").get(productController.getProductByCategory);
 
 module.exports = router;

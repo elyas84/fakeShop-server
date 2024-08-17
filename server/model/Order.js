@@ -20,6 +20,30 @@ const orderSchema = new mongoose.Schema(
         },
       },
     ],
+    firstname: {
+      type: String,
+      required: true,
+    },
+    lastname: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    mobileNumber: {
+      type: String,
+      required: true,
+    },
+    address: {
+      type: String,
+      required: true,
+    },
+    city: {
+      type: String,
+      required: true,
+    },
     delivered: {
       type: Boolean,
       default: false,
