@@ -4,13 +4,13 @@ const verifyToken = async (req, res, next) => {
   token = req.cookies.accessToken;
   if (!token) {
     return res.status(401).json({
-      message: "Unauthorized User, please login.",
+      message: "User not permitted, please log in.",
     });
   }
   jwt.verify(token, process.env.JWT_KEY, (err, payload) => {
     if (err) {
       return res.status(403).json({
-        message: "Token is not valid.",
+        message: "The token is not legitimate or expired",
       });
     } else {
       req.userId = payload.id;

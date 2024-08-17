@@ -14,11 +14,12 @@ exports.newUser = async (req, res) => {
     let registerName = await User.findOne({ username });
     if (user) {
       return res.status(400).json({
-        message: "Email is taken. please try with different one.",
+        message:
+          "Please try a different email address as the one you registered already. ",
       });
     } else if (registerName) {
       return res.status(400).json({
-        message: "username is taken, please try with different one.",
+        message: "The username is already taken,  please select another.",
       });
     }
 
@@ -52,7 +53,7 @@ exports.newUser = async (req, res) => {
     const mailOption = {
       from: process.env.EMAIL_ADDERESS,
       to: user.email,
-      subject: "Email confirmation from Fake-Shop",
+      subject: "Fake-Shop",
       html: `
           <!DOCTYPE html>
     <html lang="en">
@@ -122,12 +123,12 @@ exports.getEmailConfirmation = async (req, res) => {
     const user = await User.findOne({ email: decoded.email });
     if (!user) {
       return res.status(400).json({
-        error: "Invalid token or user does not exist",
+        error: "The email was incorrect or the token was invalid.",
       });
     }
     if (user.isVerified) {
       return res.status(400).json({
-        error: "Email already confirmed.",
+        error: "the email has already been verified.",
       });
     }
     user.isVerified = true;
@@ -156,7 +157,7 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(404).json({
-        message: "wrong login information; try again!",
+        message: "wrong login information, try again!",
       });
     }
     const isPasswordValid = await bcrypt.compare(
@@ -165,7 +166,7 @@ exports.login = async (req, res) => {
     );
     if (!isPasswordValid) {
       return res.status(401).json({
-        message: "wrong login information; try again!",
+        message: "wrong login information, try again!",
       });
     }
     const token = jwt.sign(
@@ -204,6 +205,6 @@ exports.logout = async (req, res) => {
     })
     .status(200)
     .json({
-      message: "The user has successfully signed out.",
+      message: "Your sign-out has been completed successfully.",
     });
 };

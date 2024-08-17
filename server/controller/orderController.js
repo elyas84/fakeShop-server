@@ -1,7 +1,5 @@
-const { json } = require("express");
 const Order = require("../model/Order");
-const User = require("../model/User");
-
+const Product = require("../model/Product");
 exports.getOrderItems = async (req, res) => {
   let orders;
   count = await Order.countDocuments();
@@ -57,6 +55,20 @@ exports.newOrder = async (req, res) => {
       total: sum + 5.5 + 4.99,
       user: req.userId,
     });
+    // updateing in inStock
+    let quanityFromOrderItems, prodoctIdFromOrderItems;
+    orderItems.forEach((data) => {
+      return (
+        (quanityFromOrderItems = data.quanity),
+        (prodoctIdFromOrderItems = data.product)
+      );
+    });
+
+    const productToUpdate = await Product.findById(prodoctIdFromOrderItems);
+    if (productToUpdate) {
+      productToUpdate.inStock -= quanityFromOrderItems;
+    }
+    await productToUpdate.save();
     order = await order.save();
     return res.status(201).json(order);
   } catch (error) {
