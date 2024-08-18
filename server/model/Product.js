@@ -56,7 +56,6 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["mobile", "tv", "gaming", "computer", "camera"],
       required: true,
     },
     numReviews: {

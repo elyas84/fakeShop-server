@@ -173,7 +173,7 @@ exports.login = async (req, res) => {
       { id: user._id, role: user.role },
       process.env.JWT_KEY,
       {
-        expiresIn: "1h",
+        expiresIn: "5h",
       }
     );
     const { password, ...info } = user._doc;
@@ -182,7 +182,7 @@ exports.login = async (req, res) => {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        maxAge: 60 * 60 * 1000, // 1h,
+        maxAge: 5 * 60 * 60 * 1000, // 1h,
       })
       .status(200)
       .json(info);

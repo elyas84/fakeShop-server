@@ -76,8 +76,11 @@ exports.updateProduct = async (req, res) => {
     product.price = req.body.price || product.price;
     product.information = req.body.information || product.information;
     product.inStock = req.body.inStock || product.inStock;
+    product.category = req.body.category || product.category;
     await product.save();
-    return res.status(200).json(product);
+    return res
+      .status(200)
+      .json({ message: "The product has been succefully updated.", product });
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
