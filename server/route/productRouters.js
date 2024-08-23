@@ -23,5 +23,10 @@ router
 router.route("/:id/reviews").post(verifyToken, productController.createReivew);
 
 router.route("/categories").get(productController.getProductByCategory);
+router.route("/rating").get(productController.getProductByRating);
+router.route("/search").get(productController.getProductsBySearchKeywords);
+router.route("/prices").get(productController.getProductsByPriceRange);
+router.route("/categories/prices").get(productController.getProductByCategoryAndPriceRange);
+router.route("/categories/rating").get(productController.getProductByCategoryAndRatio);
 
 module.exports = router;

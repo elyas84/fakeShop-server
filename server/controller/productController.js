@@ -1,29 +1,14 @@
 const Product = require("../model/Product");
 exports.getProducts = async (req, res) => {
   try {
-    let products;
-    const byBrand = req.query.byBrand;
-    const minPrice = req.query.minPrice;
-    const maxPrice = req.query.maxPrice;
-    if (byBrand) {
-      products = await Product.find({
-        productName: { $regex: byBrand, $options: "i" },
+    let products = await Product.find();
+    count = await Product.countDocuments();
+    if (products && products.length === 0) {
+      return res.status(404).json({
+        message:
+          "Sorry! It's possible that we don't have any products in stock, please come back later.",
       });
-      return res.status(200).json(products);
-    } else if (minPrice || maxPrice) {
-      products = await Product.find({
-        price: { $gte: minPrice, $lte: maxPrice },
-      });
-      return res.status(200).json(products);
     } else {
-      products = await Product.find();
-      count = await Product.countDocuments();
-      if (products && products.length === 0) {
-        return res.status(404).json({
-          message:
-            "Sorry! It's possible that we don't have any products in stock, please come back later.",
-        });
-      }
       return res.status(200).json({ products, count });
     }
   } catch (error) {
@@ -138,6 +123,8 @@ exports.createReivew = async (req, res) => {
   }
 };
 
+// Filtering
+
 exports.getProductByCategory = async (req, res) => {
   try {
     const cat = req.query.cat;
@@ -146,6 +133,107 @@ exports.getProductByCategory = async (req, res) => {
       return res.status(404).json({
         message:
           "Sorry! It's possible that we don't have any products in stock, please come back later.",
+      });
+    }
+    return res.status(200).json(products);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
+exports.getProductByRating = async (req, res) => {
+  try {
+    const ratio = req.query.ratio;
+    // let products = await Product.find({ category: { $in: [cat] } });
+    let products = await Product.find({ rating: ratio });
+    if (products && products.length === 0) {
+      return res.status(404).json({
+        message:
+          "We apologize; it's possible that the customer hasn't commented on this product yet. ",
+      });
+    } else {
+      return res.status(200).json(products);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
+exports.getProductsByPriceRange = async (req, res) => {
+  const minPrice = req.query.minPrice;
+  const maxPrice = req.query.maxPrice;
+  try {
+    let products = await Product.find({
+      price: { $gte: minPrice, $lte: maxPrice },
+    });
+
+    if (products && products.length === 0) {
+      return res.status(404).json({
+        message:
+          "We are sorry, but it's possible that at this time there are no matches for your search.",
+      });
+    } else {
+      return res.status(200).json(products);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
+exports.getProductsBySearchKeywords = async (req, res) => {
+  try {
+    const search = req.query.search;
+    let products = await Product.find({
+      productName: { $regex: search, $options: "i" },
+    });
+    if (products && products.length === 0) {
+      return res.status(404).json({
+        message: "We apologize, but nothing matches your search!",
+      });
+    } else {
+      return res.status(200).json(products);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
+exports.getProductByCategoryAndPriceRange = async (req, res) => {
+  const cat = req.query.cat;
+  const minPrice = req.query.minPrice;
+  const maxPrice = req.query.maxPrice;
+  try {
+    const products = await Product.find({
+      category: cat,
+      price: { $gte: minPrice, $lte: maxPrice },
+    });
+    if (products && products.length === 0) {
+      return res.status(404).json({
+        message: "We apologize, but nothing matches your search!",
+      });
+    } else {
+      return res.status(200).json(products);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
+exports.getProductByCategoryAndRatio = async (req, res) => {
+  try {
+    const ratio = req.query.ratio;
+    const cat = req.query.cat;
+    // let products = await Product.find({ category: { $in: [cat] } });
+    let products = await Product.find({ category: cat, rating: ratio });
+    if (products && products.length === 0) {
+      return res.status(404).json({
+        message:
+          "We apologize; it's possible that the customer hasn't commented on this product yet. ",
       });
     } else {
       return res.status(200).json(products);
