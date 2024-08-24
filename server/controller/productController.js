@@ -85,7 +85,7 @@ exports.deleteProduct = async (req, res) => {
 };
 
 exports.createReivew = async (req, res) => {
-  const { rating, comment, username } = req.body;
+  const { rating, comment, username, email } = req.body;
   try {
     const product = await Product.findById(req.params.id);
     if (product) {
@@ -103,20 +103,36 @@ exports.createReivew = async (req, res) => {
         username,
         rating,
         comment,
+        email,
         user: req.userId,
       };
 
       product.reviews.push(review);
       product.numReviews = product.reviews.length;
-      product.rating =
+      product.rating = Math.floor(
         product.reviews.reduce((acc, review) => acc + review.rating, 0) /
-        product.reviews.length;
+          product.reviews.length
+      ).toFixed(2);
 
       await product.save();
       return res.status(200).json({
         message: "a new review added successfully. ",
       });
     }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
+exports.deleteAReview = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    product.reviews.pop();
+    await product.save();
+    return res.status(200).json({
+      message: "a new review deleted successfully. ",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json(error);

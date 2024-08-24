@@ -21,12 +21,19 @@ router
   .delete(verifyToken, verifyAdmin, productController.deleteProduct);
 // add c comment
 router.route("/:id/reviews").post(verifyToken, productController.createReivew);
+router
+  .route("/:id/delete/review")
+  .delete(verifyToken, verifyAdmin, productController.deleteAReview);
 
 router.route("/categories").get(productController.getProductByCategory);
 router.route("/rating").get(productController.getProductByRating);
 router.route("/search").get(productController.getProductsBySearchKeywords);
 router.route("/prices").get(productController.getProductsByPriceRange);
-router.route("/categories/prices").get(productController.getProductByCategoryAndPriceRange);
-router.route("/categories/rating").get(productController.getProductByCategoryAndRatio);
+router
+  .route("/categories/prices")
+  .get(productController.getProductByCategoryAndPriceRange);
+router
+  .route("/categories/rating")
+  .get(productController.getProductByCategoryAndRatio);
 
 module.exports = router;

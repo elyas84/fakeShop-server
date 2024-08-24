@@ -8,6 +8,12 @@ const nodemailer = require("nodemailer");
 //@route /register
 
 exports.newUser = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      message: errors.array()[0].msg,
+    });
+  }
   const { username, email, password, role } = req.body;
   try {
     let user = await User.findOne({ email });
@@ -135,7 +141,8 @@ exports.getEmailConfirmation = async (req, res) => {
     user.confirmationToken = null;
     await user.save();
     return res.status(201).json({
-      message: "Congratulations! Your email has been successfully confirmed.",
+      message:
+        "Congratulations! Your email has been successfully confirmed. Now please login",
     });
   } catch (error) {
     console.log(error);
@@ -198,7 +205,6 @@ exports.login = async (req, res) => {
 exports.logout = async (req, res) => {
   res
     .clearCookie("accessToken", {
-      httpOnly: true,
       httpOnly: true,
       secure: true,
       sameSite: "none",

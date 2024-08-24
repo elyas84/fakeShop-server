@@ -40,7 +40,15 @@ exports.getOrderItems = async (req, res) => {
 };
 
 exports.newOrder = async (req, res) => {
-  const { orderItems } = req.body;
+  const {
+    orderItems,
+    firstname,
+    lastname,
+    email,
+    mobileNumber,
+    address,
+    city,
+  } = req.body;
   const totalPriceForItems = orderItems.map((data) => {
     return data.price * data.quanity;
   });
@@ -54,6 +62,12 @@ exports.newOrder = async (req, res) => {
       orderItems,
       total: sum + 5.5 + 4.99,
       user: req.userId,
+      firstname,
+      lastname,
+      email,
+      mobileNumber,
+      address,
+      city,
     });
     // updateing in inStock
     let quanityFromOrderItems, prodoctIdFromOrderItems;
