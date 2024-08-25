@@ -106,8 +106,6 @@ exports.newUser = async (req, res) => {
         </p>
       </body>
     </html>
-      
-      
       `,
     };
 
@@ -189,7 +187,7 @@ exports.login = async (req, res) => {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        maxAge: 5 * 60 * 60 * 1000, // 1h,
+        maxAge: 5 * 60 * 60 * 1000, // 5h,
       })
       .status(200)
       .json(info);

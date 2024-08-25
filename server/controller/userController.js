@@ -42,21 +42,15 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-
     if (!user) {
       return res.status(404).json({
         message: "We're not sure if this account exists in our database!",
       });
     } else {
-      if (req.userId !== user._id.toString()) {
-        return res.status(403).json({
-          message: "This account cannot be updated!",
-        });
-      }
       await User.findByIdAndDelete(req.params.id);
       return res.status(200).json({
         message:
-          "Right now, your account has been deleted. Although we are sorry to split from you, you are always welcome!",
+          "Right now, This account has been deleted. Although we are sorry to split from you, you are always welcome!",
       });
     }
   } catch (error) {

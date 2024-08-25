@@ -1,43 +1,6 @@
 const Order = require("../model/Order");
 const Product = require("../model/Product");
-exports.getOrderItems = async (req, res) => {
-  let orders;
-  count = await Order.countDocuments();
-  try {
-    let paid = req.query.paid;
-    let delivered = req.query.delivered;
-    let paidAndDelivered = req.query.paidAndDelivered;
-    if (paid) {
-      count = await Order.countDocuments({ isPaid: true });
-      orders = await Order.find({ isPaid: true });
-      return res.status(200).json({ orders, count });
-    } else if (paidAndDelivered) {
-      orders = await Order.find({
-        $and: [{ delivered: true }, { isPaid: true }],
-      });
-      count = await Order.countDocuments({ delivered: true }, { isPaid: true });
-      return res.status(200).json({ orders, count });
-    } else if (delivered) {
-      count = await Order.countDocuments({ delivered: true });
-      orders = await Order.find({ delivered: true });
-      return res.status(200).json({ orders, count });
-    } else {
-      orders = await Order.find().populate("user", "email username");
-      count = await Order.countDocuments();
-      if (orders && orders.length === 0) {
-        return res.status(404).json({
-          message: "No order has been placed as of yet.",
-          count,
-        });
-      } else {
-        return res.status(200).json({ orders, count });
-      }
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
-  }
-};
+const nodemailer = require("nodemailer");
 
 exports.newOrder = async (req, res) => {
   const {
@@ -84,6 +47,67 @@ exports.newOrder = async (req, res) => {
     }
     await productToUpdate.save();
     order = await order.save();
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_ADDERESS,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOption = {
+      from: process.env.EMAIL_ADDERESS,
+      to: process.env.EMAIL_ADDERESS,
+      subject: "Deliver update from Fake-Shop",
+      html: `
+          <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=, initial-scale=1.0" />
+        <title></title>
+        <style>
+          * {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+          }
+          h1 {
+            background-color: gray;
+            width: 100%;
+            height: 100%;
+            padding: 5px;
+            color: #fff;
+          }
+          p {
+            color: gray;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          a {
+            border: 1px solid lightgray;
+            padding: 4px;
+            margin: 0 10px;
+          }
+        </style>
+      </head>
+
+      <body>
+        <h1>Deliver update from Fake-Shop</h1>
+        <p>
+        Hi Admin, We received a fresh order from the client. 
+        </p>
+       
+      </body>
+    </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOption);
+
     return res.status(201).json(order);
   } catch (error) {
     console.log(error.message);
@@ -127,12 +151,12 @@ exports.getOrder = async (req, res) => {
   }
 };
 
-exports.updateORderToPaid = async (req, res) => {
+exports.updateOrderToPaid = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     order.isPaid = true;
     await order.save();
-    return res.status(201).json({
+    return res.status(200).json({
       message: "Your orders have been successfully paid.",
     });
   } catch (error) {
@@ -141,14 +165,80 @@ exports.updateORderToPaid = async (req, res) => {
   }
 };
 
-exports.updateORderToDelivered = async (req, res) => {
+exports.updateOrderToDelivered = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
+
     order.delivered = true;
     await order.save();
-    return res.status(201).json({
-      message: "Your orders have been successfully delevired.",
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_ADDERESS,
+        pass: process.env.EMAIL_PASS,
+      },
     });
+
+    const mailOption = {
+      from: process.env.EMAIL_ADDERESS,
+      to: order.email,
+      subject: "Fake-Shop",
+      html: `
+          <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=, initial-scale=1.0" />
+        <title></title>
+        <style>
+          * {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+          }
+          h1 {
+            background-color: gray;
+            width: 100%;
+            height: 100%;
+            padding: 5px;
+            color: #fff;
+          }
+          p {
+            color: gray;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          a {
+            border: 1px solid lightgray;
+            padding: 4px;
+            margin: 0 10px;
+          }
+        </style>
+      </head>
+
+      <body>
+        <h1>👋 ${order.firstname}, Deliver update from Fake-Shop</h1>
+        <p>
+       We're excited to inform you that your order is on its way! and I appreciate your patience. 🚚
+        </p>
+        <p>Please check your personal information below</p>
+          <p>👨 - ${order.firstname} ${order.lastname}</p>
+          <p>🏠 - ${order.address} ${order.city}</p>
+          <p> ☎️ - ${order.mobileNumber} </p>
+          <p>💰 - ${order.total} </p>
+          <small>alwyas reach out our at www.fakeshop.com</small>
+      </body>
+    </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOption);
+    return res
+      .status(200)
+      .json({ message: "Order has been successfully delivered." });
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
@@ -158,12 +248,13 @@ exports.updateORderToDelivered = async (req, res) => {
 exports.getOrders = async (req, res) => {
   try {
     let orders = await Order.find();
+    let count = await Order.countDocuments();
     if (orders && orders.length === 0) {
       return res.status(404).json({
         message: "No order has been placed as of yet.",
       });
     } else {
-      return res.status(200).json(order);
+      return res.status(200).json({ orders, count });
     }
   } catch (error) {
     console.log(error);

@@ -1,5 +1,6 @@
 const Product = require("../model/Product");
 exports.getProducts = async (req, res) => {
+  
   try {
     let products = await Product.find();
     count = await Product.countDocuments();
