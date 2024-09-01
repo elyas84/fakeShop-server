@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
+const axios = require("axios");
 const PORT = process.env.PORT || 5000;
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
@@ -33,6 +34,10 @@ app.use("/api/orders", orderRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/products", productRoute);
+
+app.get("/api/config/paypal", (req, res) => {
+  return res.json(process.env.PAYPAL_CLIENT_ID);
+});
 
 app.listen(PORT, () => {
   console.log("Server is running on port " + PORT);

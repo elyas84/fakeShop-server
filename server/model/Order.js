@@ -57,12 +57,12 @@ const orderSchema = new mongoose.Schema(
     shipping: {
       type: Number,
       required: true,
-      default: 4.99,
+      default: 0.0,
     },
     tax: {
       type: Number,
       required: true,
-      default: 5.5,
+      default: 0.0,
     },
     total: {
       type: Number,

@@ -1,8 +1,14 @@
 const Order = require("../model/Order");
 const Product = require("../model/Product");
 const nodemailer = require("nodemailer");
-
+const { validationResult } = require("express-validator");
 exports.newOrder = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      message: errors.array()[0].msg,
+    });
+  }
   const {
     orderItems,
     firstname,
@@ -10,20 +16,22 @@ exports.newOrder = async (req, res) => {
     email,
     mobileNumber,
     address,
+    total,
     city,
   } = req.body;
-  const totalPriceForItems = orderItems.map((data) => {
-    return data.price * data.quanity;
-  });
-  let sum = 0;
-  totalPriceForItems.reduce(function (accumulator, currentValue) {
-    return (sum = accumulator + currentValue);
-  }, 0);
+
+  // const totalPriceForItems = orderItems.map((data) => {
+  //   return data.price * data.quanity;
+  // });
+  // let sum = 0;
+  // totalPriceForItems.reduce(function (accumulator, currentValue) {
+  //   return (sum = accumulator + currentValue);
+  // }, 0);
 
   try {
     let order = new Order({
       orderItems,
-      total: sum + 5.5 + 4.99,
+      total,
       user: req.userId,
       firstname,
       lastname,
@@ -47,70 +55,69 @@ exports.newOrder = async (req, res) => {
     }
     await productToUpdate.save();
     order = await order.save();
+    // const transporter = nodemailer.createTransport({
+    //   service: "gmail",
+    //   auth: {
+    //     user: process.env.EMAIL_ADDERESS,
+    //     pass: process.env.EMAIL_PASS,
+    //   },
+    // });
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_ADDERESS,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    // const mailOption = {
+    //   from: process.env.EMAIL_ADDERESS,
+    //   to: process.env.EMAIL_ADDERESS,
+    //   subject: "Deliver update from Fake-Shop",
+    //   html: `
+    //       <!DOCTYPE html>
+    // <html lang="en">
+    //   <head>
+    //     <meta charset="UTF-8" />
+    //     <meta name="viewport" content="width=, initial-scale=1.0" />
+    //     <title></title>
+    //     <style>
+    //       * {
+    //         font-family: Verdana, Geneva, Tahoma, sans-serif;
+    //         text-align: center;
+    //         text-transform: uppercase;
+    //         letter-spacing: 1px;
+    //       }
+    //       h1 {
+    //         background-color: gray;
+    //         width: 100%;
+    //         height: 100%;
+    //         padding: 5px;
+    //         color: #fff;
+    //       }
+    //       p {
+    //         color: gray;
+    //         display: flex;
+    //         align-items: center;
+    //         justify-content: center;
+    //       }
+    //       a {
+    //         border: 1px solid lightgray;
+    //         padding: 4px;
+    //         margin: 0 10px;
+    //       }
+    //     </style>
+    //   </head>
 
-    const mailOption = {
-      from: process.env.EMAIL_ADDERESS,
-      to: process.env.EMAIL_ADDERESS,
-      subject: "Deliver update from Fake-Shop",
-      html: `
-          <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=, initial-scale=1.0" />
-        <title></title>
-        <style>
-          * {
-            font-family: Verdana, Geneva, Tahoma, sans-serif;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-          }
-          h1 {
-            background-color: gray;
-            width: 100%;
-            height: 100%;
-            padding: 5px;
-            color: #fff;
-          }
-          p {
-            color: gray;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          a {
-            border: 1px solid lightgray;
-            padding: 4px;
-            margin: 0 10px;
-          }
-        </style>
-      </head>
+    //   <body>
+    //     <h1>Deliver update from Fake-Shop</h1>
+    //     <p>
+    //     Hi Admin, We received a fresh order from the client.
+    //     </p>
 
-      <body>
-        <h1>Deliver update from Fake-Shop</h1>
-        <p>
-        Hi Admin, We received a fresh order from the client. 
-        </p>
-       
-      </body>
-    </html>
-      `,
-    };
+    //   </body>
+    // </html>
+    //   `,
+    // };
 
-    await transporter.sendMail(mailOption);
+    // await transporter.sendMail(mailOption);
 
     return res.status(201).json(order);
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
     res.status(500).json(error);
   }
 };
@@ -151,6 +158,7 @@ exports.getOrder = async (req, res) => {
   }
 };
 
+// paypal will take place here!
 exports.updateOrderToPaid = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
