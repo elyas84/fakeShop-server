@@ -2,10 +2,10 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const axios = require("axios");
 const PORT = process.env.PORT || 5000;
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
+
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
@@ -35,9 +35,16 @@ app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/products", productRoute);
 
-app.get("/api/config/paypal", (req, res) => {
-  return res.json(process.env.PAYPAL_CLIENT_ID);
-});
+// STRIPEs
+const stripePaymentRouter = require("./route/stripePaymantRoute");
+app.use("/api/payment", stripePaymentRouter);
+// app.get("/api/stripe/config/public", (req, res) => {
+//   res.json(process.env.STRIP_CLIENT);
+// });
+
+// app.get("/api/stripe/config/secret", (req, res) => {
+//   res.json(process.env.STRIP_SECRET);
+// });
 
 app.listen(PORT, () => {
   console.log("Server is running on port " + PORT);
