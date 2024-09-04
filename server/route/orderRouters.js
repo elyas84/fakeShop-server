@@ -7,7 +7,7 @@ router.route("/").get(verifyToken, verifyAdmin, orderController.getOrders);
 router.route("/myorders").get(verifyToken, orderController.getMyOrders);
 router.route("/:id").get(verifyToken, orderController.getOrder);
 router.route("/new").post(verifyToken, orderInput, orderController.newOrder);
-router.route("/paid/:id").put(verifyToken, orderController.updateOrderToPaid);
+router.route("/paid/:id").put(orderController.updateOrderToPaid);
 router.route("/delivered/:id").put(orderController.updateOrderToDelivered); // open however protected in frontend
 router
   .route("/delete/:id")
