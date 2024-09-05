@@ -10,7 +10,9 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+const DEV_ENV = "http://localhost:3000";
+const PROD_ENV = "https://fakeshop-client-o4mz.onrender.com";
+app.use(cors({ origin: PROD_ENV, credentials: true }));
 // DB
 const mongoConn = async () => {
   try {
