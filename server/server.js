@@ -38,13 +38,6 @@ app.use("/api/products", productRoute);
 // STRIPEs
 const stripePaymentRouter = require("./route/stripePaymantRoute");
 app.use("/api/payment", stripePaymentRouter);
-// app.get("/api/stripe/config/public", (req, res) => {
-//   res.json(process.env.STRIP_CLIENT);
-// });
-
-// app.get("/api/stripe/config/secret", (req, res) => {
-//   res.json(process.env.STRIP_SECRET);
-// });
 
 app.listen(PORT, () => {
   console.log("Server is running on port " + PORT);
