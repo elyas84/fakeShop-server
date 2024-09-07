@@ -13,8 +13,9 @@ app.use(morgan("dev"));
 //const DEV_ENV = "http://localhost:3000";
 const PROD_ENV = "https://fakeshop-client-o4mz.onrender.com";
 app.use(
-  cors({ origin: PROD_ENV, credentials: true }),
-  header("Access-Control-Allow-Origin: *")
+  cors(
+    { origin: PROD_ENV, credentials: true },  
+  )
 );
 // DB
 const mongoConn = async () => {
@@ -42,7 +43,6 @@ app.use("/api/products", productRoute);
 
 // STRIPEs
 const stripePaymentRouter = require("./route/stripePaymantRoute");
-const { header } = require("express-validator");
 app.use("/api/payment", stripePaymentRouter);
 
 app.listen(PORT, () => {
