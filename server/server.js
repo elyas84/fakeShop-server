@@ -10,9 +10,19 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
-const DEV_ENV = "http://localhost:3000";
-const PROD_ENV = "https://fakeshop-client-o4mz.onrender.com";
-app.use(cors({ origin: PROD_ENV, credentials: true }));
+//const DEV_ENV = "http://localhost:3000";
+//const PROD_ENV = "https://fakeshop-client-o4mz.onrender.com";
+app.use(
+  cors(
+   // { origin: PROD_ENV, credentials: true },
+    {
+      origin: "*",
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+      preflightContinue: false,
+      optionsSuccessStatus: 204,
+    }
+  )
+);
 // DB
 const mongoConn = async () => {
   try {
