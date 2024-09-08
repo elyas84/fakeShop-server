@@ -4,9 +4,8 @@ const Stripe = require("stripe");
 const stripe = Stripe(process.env.STRIP_SECRET);
 const DEV_ENV = "http://localhost:3000";
 const PROD_ENV = "https://fakeshop-client-o4mz.onrender.com";
-router.post("/create-checkout-session", async (req, res, next) => {
+router.post("/create-checkout-session", async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", PROD_ENV);
-  next();
   const line_items = req.body.orders.map((item) => {
     return {
       price_data: {
@@ -31,7 +30,6 @@ router.post("/create-checkout-session", async (req, res, next) => {
     cancel_url: process.env.DEV_ENV + "/cart",
   });
   return res.json({ url: session.url });
-  next();
 });
 
 module.exports = router;
