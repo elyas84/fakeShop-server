@@ -2,6 +2,8 @@ const User = require("../model/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { validationResult } = require("express-validator");
+const DEV_ENV = "http://localhost:5000/api";
+const PROD_ENV = "https://fakeshop-server-mqdr.onrender.com/api";
 const nodemailer = require("nodemailer");
 
 //@desc Register
@@ -99,7 +101,7 @@ exports.newUser = async (req, res) => {
         <h1>👋 ${username}, welcome to Fake-Shop 🤩</h1>
         <p>
           Please confirm your email by cklicking on the following link ➡️
-          <a href="http://localhost:5000/api/auth/confirm/${confirmationToken}"
+          <a href="${PROD_ENV}/auth/confirm/${confirmationToken}"
             >Confirm your Email
           </a>
           ⬅️
