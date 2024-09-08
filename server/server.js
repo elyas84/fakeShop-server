@@ -12,23 +12,6 @@ app.use(morgan("dev"));
 const DEV_ENV = "http://localhost:3000";
 const PROD_ENV = "https://fakeshop-client-o4mz.onrender.com";
 app.use(cors({ origin: PROD_ENV, credentials: true }));
-
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", PROD_ENV);
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,CONNECT,TRACE"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-Content-Type-Options, Accept, X-Requested-With, Origin, Access-Control-Request-Method, Access-Control-Request-Headers"
-  );
-  res.setHeader("Access-Control-Allow-Credentials", true);
-  res.setHeader("Access-Control-Allow-Private-Network", true);
-  res.setHeader("Access-Control-Max-Age", 7200);
-  next();
-});
-
 // DB
 const mongoConn = async () => {
   try {

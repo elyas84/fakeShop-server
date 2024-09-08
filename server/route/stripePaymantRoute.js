@@ -2,7 +2,11 @@ const express = require("express");
 const router = express.Router();
 const Stripe = require("stripe");
 const stripe = Stripe(process.env.STRIP_SECRET);
-router.post("/create-checkout-session", async (req, res) => {
+const DEV_ENV = "http://localhost:3000";
+const PROD_ENV = "https://fakeshop-client-o4mz.onrender.com";
+router.post("/create-checkout-session", async (req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", PROD_ENV);
+  next();
   const line_items = req.body.orders.map((item) => {
     return {
       price_data: {
